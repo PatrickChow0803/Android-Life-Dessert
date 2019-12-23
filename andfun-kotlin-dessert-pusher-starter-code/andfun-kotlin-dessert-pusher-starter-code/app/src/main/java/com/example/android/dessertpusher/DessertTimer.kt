@@ -17,6 +17,9 @@
 package com.example.android.dessertpusher
 
 import android.os.Handler
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import timber.log.Timber
 
 /**
@@ -34,7 +37,9 @@ import timber.log.Timber
  * https://developer.android.com/guide/components/processes-and-threads
  *
  */
-class DessertTimer {
+// Extending LifeCyclerObserver gives DessertTimer the ability to observe life cycle changes
+// The parameter lifecycle is the lifecycle that's actually be observed.
+class DessertTimer(lifecycle: Lifecycle) : LifecycleObserver{
 
     // The number of seconds counted since the timer started
     var secondsCount = 0
@@ -46,7 +51,19 @@ class DessertTimer {
     private var handler = Handler()
     private lateinit var runnable: Runnable
 
+    // Tells what to observe
+    init {
+        lifecycle.addObserver(this)
+    }
 
+    // What this is saying. Whenever the lifecycle that I'm observing goes through on_pause, call dummyMethod.
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    fun dummyMethod(){
+        Timber.i("I was called")
+    }
+
+    // What this is saying. Whenever the lifecycle that I'm observing goes through on_start, call startTimer.
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun startTimer() {
         // Create the runnable action, which prints out a log and increments the seconds counter
         runnable = Runnable {
@@ -65,6 +82,8 @@ class DessertTimer {
         // In this case, no looper is defined, and it defaults to the main or UI thread.
     }
 
+    // What this is saying. Whenever the lifecycle that I'm observing goes through on_stop, call stopTimer.
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun stopTimer() {
         // Removes all pending posts of runnable from the handler's queue, effectively stopping the
         // timer

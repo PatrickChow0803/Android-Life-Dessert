@@ -18,6 +18,7 @@ package com.example.android.dessertpusher
 
 import android.content.ActivityNotFoundException
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -28,6 +29,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleObserver
 import com.example.android.dessertpusher.databinding.ActivityMainBinding
 import timber.log.Timber
+
+const val KEY_REVENUE = "key_revenue"
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
@@ -73,11 +76,24 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         // Use Data Binding to get reference to the views
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        /*
+        -----------------------
+           THE BINDING REFERS TO THE BINDING OF THE UI.
+           THEREFORE binding.revenue REFERS TO THE UI VALUE FOR REVENUE
+
+        -----------------------
+         */
+
         binding.dessertButton.setOnClickListener {
             onDessertClicked()
         }
 
         dessertTimer = DessertTimer(this.lifecycle)
+
+        // If the bundle isn't empty
+        if(savedInstanceState != null){
+            revenue = savedInstanceState.getInt(KEY_REVENUE)
+        }
 
         // Set the TextViews to the right values
         binding.revenue = revenue
@@ -167,5 +183,20 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         Timber.i("onStop Called")
 
 //        dessertTimer.stopTimer()
+    }
+
+    // This is called after onStop for API 28+. Called before onStop for API 27-
+    // Use this for when you want to save variables that aren't kept in track with the Android OS
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        outState?.putInt(KEY_REVENUE, revenue)
+        Timber.i("onSaveInstanceState Called")
+
+    }
+
+    // This is called right after onStart
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
     }
 }
